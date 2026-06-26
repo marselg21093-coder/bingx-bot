@@ -1,6 +1,6 @@
 """
 BTC/USDT Технический анализ
-Берёт данные с Binance, считает индикаторы, генерирует свечной график
+Берёт данные с Yahoo Finance, считает индикаторы, генерирует свечной график
 и отправляет в Telegram-канал каждый день в 17:35 МСК
 """
 
@@ -10,6 +10,7 @@ import requests
 import pandas as pd
 import mplfinance as mpf
 import pandas_ta as ta
+import yfinance as yf
 import matplotlib
 matplotlib.use("Agg")
 from io import BytesIO
@@ -22,24 +23,17 @@ REF_LINK = "https://bingx.com/ru/partner/A888"
 # ─── ДАННЫЕ ──────────────────────────────────────────────────────────────────
 
 def get_btc_ohlcv() -> pd.DataFrame:
-    """Получить 4H свечи BTC/USDT с Binance (последние 100 свечей)."""
-    url = "https://api.binance.com/api/v3/klines"
-    r = requests.get(
-        url,
-        params={"symbol": "BTCUSDT", "interval": "4h", "limit": 100},
-        timeout=15,
+    """Получить 4H свечи BTC с Yahoo Finance (последние 15 дней)."""
+    df = yf.download(
+        "BTC-USD",
+        period="15d",
+        interval="4h",
+        auto_adjust=True,
+        progress=False,
     )
-    r.raise_for_status()
-    raw = r.json()
-    df = pd.DataFrame(raw, columns=[
-        "ts", "open", "high", "low", "close", "volume",
-        "close_ts", "qv", "n", "tbb", "tbq", "ignore",
-    ])
-    df.index = pd.to_datetime(df["ts"], unit="ms")
     df.index.name = "Date"
-    for c in ["open", "high", "low", "close", "volume"]:
-        df[c] = df[c].astype(float)
-    return df[["open", "high", "low", "close", "volume"]]
+    df.columns = [c.lower() for c in df.columns]
+    return df[["open", "high", "low", "close", "volume"]].dropna()
 
 
 # ─── ИНДИКАТОРЫ ──────────────────────────────────────────────────────────────
@@ -62,7 +56,7 @@ def calculate_indicators(df: pd.DataFrame) -> dict:
     ema200 = ta.ema(close, length=200).iloc[-1]
 
     price     = close.iloc[-1]
-    prev_24h  = close.iloc[-7]   # 6 свечей × 4ч = 24ч назад
+    prev_24h  = close.iloc[-7]
     change_24h = (price - prev_24h) / prev_24h * 100
 
     support    = round(min(df["low"].tail(20).min(), bb_lower), 0)
@@ -214,7 +208,7 @@ def send_analysis(buf: BytesIO, caption: str) -> None:
 # ─── ЗАПУСК ──────────────────────────────────────────────────────────────────
 
 if __name__ == "__main__":
-    print("📥 Получаю данные BTC с Binance...")
+    print("📥 Получаю данные BTC с Yahoo Finance...")
     df = get_btc_ohlcv()
 
     print("🔢 Считаю индикаторы...")
