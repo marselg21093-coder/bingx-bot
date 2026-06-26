@@ -1,0 +1,42 @@
+name: BingX Telegram Auto-Poster
+
+on:
+  schedule:
+    # Все времена в UTC. Москва = UTC+3
+    - cron: '0 5 * * *'   # 08:00 МСК — утренний пост
+    - cron: '0 10 * * *'  # 13:00 МСК — образовательный пост
+    - cron: '0 16 * * *'  # 19:00 МСК — вечерний CTA-пост
+  workflow_dispatch:       # Кнопка ручного запуска в GitHub
+
+jobs:
+  send-post:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Определить тип поста по времени
+        id: post-type
+        run: |
+          HOUR=$(date -u +%H)
+          if [ "$HOUR" = "05" ]; then
+            echo "type=morning" >> $GITHUB_OUTPUT
+          elif [ "$HOUR" = "10" ]; then
+            echo "type=afternoon" >> $GITHUB_OUTPUT
+          else
+            echo "type=evening" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Отправить пост
+        env:
+          BOT_TOKEN: ${{ secrets.BOT_TOKEN }}
+        run: python post.py ${{ steps.post-type.outputs.type }}
