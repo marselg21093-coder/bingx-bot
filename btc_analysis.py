@@ -32,9 +32,10 @@ def get_btc_ohlcv() -> pd.DataFrame:
         progress=False,
     )
     df.index.name = "Date"
+    if isinstance(df.columns, pd.MultiIndex):
+        df.columns = df.columns.get_level_values(0)
     df.columns = [c.lower() for c in df.columns]
     return df[["open", "high", "low", "close", "volume"]].dropna()
-
 
 # ─── ИНДИКАТОРЫ ──────────────────────────────────────────────────────────────
 
