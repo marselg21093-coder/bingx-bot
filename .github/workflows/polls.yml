@@ -2,11 +2,8 @@ name: Engagement Polls
 
 on:
   schedule:
-    - cron: '05 05 * * *'   # 08:05 МСК — после утреннего поста
-    - cron: '05 10 * * *'   # 13:05 МСК — после дневного поста
     - cron: '40 14 * * *'   # 17:40 МСК — после BTC-анализа
-    - cron: '05 16 * * *'   # 19:05 МСК — после вечернего поста
-  workflow_dispatch:         # Кнопка ручного запуска
+  workflow_dispatch:
 
 jobs:
   send-poll:
@@ -24,22 +21,7 @@ jobs:
       - name: Install dependencies
         run: pip install requests
 
-      - name: Определить тип опроса
-        id: poll_type
-        run: |
-          HOUR=$(date -u +"%H")
-          MIN=$(date -u +"%M")
-          if [ "$HOUR" = "05" ]; then
-            echo "type=morning" >> $GITHUB_OUTPUT
-          elif [ "$HOUR" = "10" ]; then
-            echo "type=afternoon" >> $GITHUB_OUTPUT
-          elif [ "$HOUR" = "14" ]; then
-            echo "type=btc_analysis" >> $GITHUB_OUTPUT
-          else
-            echo "type=evening" >> $GITHUB_OUTPUT
-          fi
-
       - name: Отправить опрос
         env:
           BOT_TOKEN: ${{ secrets.BOT_TOKEN }}
-        run: python polls.py ${{ steps.poll_type.outputs.type }}
+        run: python polls.py btc_analysis
