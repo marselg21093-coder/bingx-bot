@@ -97,14 +97,12 @@ def generate_chart(df: pd.DataFrame, ind: dict) -> BytesIO:
     close      = df["close"]
     bb_data    = ta.bbands(close, length=20, std=2)
     ema50_data = ta.ema(close, length=50)
-    rsi_data   = ta.rsi(close, length=14)
 
     apds = [
         mpf.make_addplot(bb_data[ind["bbu_col"]].tail(60), color="#42A5F5", alpha=0.6, width=0.9),
         mpf.make_addplot(bb_data[ind["bbm_col"]].tail(60), color="#90A4AE", alpha=0.5, width=0.8, linestyle="--"),
         mpf.make_addplot(bb_data[ind["bbl_col"]].tail(60), color="#42A5F5", alpha=0.6, width=0.9),
         mpf.make_addplot(ema50_data.tail(60), color="#FFA726", width=1.3),
-        mpf.make_addplot(rsi_data.tail(60), panel=1, color="#CE93D8", width=1.2, ylabel="RSI", secondary_y=False),
     ]
 
     mc = mpf.make_marketcolors(
@@ -124,7 +122,7 @@ def generate_chart(df: pd.DataFrame, ind: dict) -> BytesIO:
     buf = BytesIO()
     mpf.plot(
         plot_df, type="candle", style=style, addplot=apds,
-        volume=True, panel_ratios=(5, 1, 1), figsize=(13, 8),
+        volume=True, panel_ratios=(4, 1), figsize=(13, 8),
         title=f"\nBTC/USDT · 4H · ${ind['price']:,.0f}  ({'+' if ind['change_24h'] >= 0 else ''}{ind['change_24h']:.1f}%)",
         savefig=dict(fname=buf, dpi=130, bbox_inches="tight"),
     )
