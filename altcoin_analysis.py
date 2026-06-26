@@ -6,6 +6,7 @@ ETH всегда + ротация монеты по дням недели
 
 import os
 import sys
+import random
 import requests
 import datetime
 import anthropic
@@ -27,34 +28,50 @@ ROTATION = {
     6: None,  # Воскресенье — итог недели
 }
 
+IMAGES = [
+    "https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?w=900&q=80",
+    "https://images.unsplash.com/photo-1640340434855-6084b1f4901c?w=900&q=80",
+    "https://images.unsplash.com/photo-1518546305927-5a555bb7020d?w=900&q=80",
+    "https://images.unsplash.com/photo-1622630998477-20aa696ecb05?w=900&q=80",
+    "https://images.unsplash.com/photo-1605792657660-596af9009e82?w=900&q=80",
+    "https://images.unsplash.com/photo-1609554496796-c345a5335ceb?w=900&q=80",
+]
+
 SYSTEM_PROMPT = """
-Ты TokenRu AI Terminal — аналитик криптовалютного рынка.
-Пишешь ежедневный образовательный разбор монеты для Telegram-канала русскоязычных трейдеров.
-Язык: только русский. Используй эмодзи. Структурируй ответ.
-Формат:
-1. Краткий контекст: что происходит с монетой
-2. Тренд (бычий / медвежий / боковик) и почему
-3. Ключевые уровни: поддержка и сопротивление
-4. На что смотреть сегодня
-5. Риски
-ВАЖНО: это образовательный анализ, не торговый сигнал.
-Заканчивай фразой: «⚠️ Это не торговый сигнал. Проводи собственный анализ перед сделкой.»
-Ответ — не более 300 слов.
+Ты аналитик крипторынка для Telegram-канала русскоязычных трейдеров.
+Пиши кратко и по делу — максимум 5-6 строк на монету.
+Правила форматирования — строго обязательны:
+- Только эмодзи как разделители, без # ## ** -- и таблиц
+- Никаких заголовков с решётками и звёздочками
+- Никаких горизонтальных линий из символов
+- Простой текст с эмодзи
+
+Структура каждого разбора:
+📈 или 📉 Тренд — одно предложение что происходит
+🎯 Поддержка X — Сопротивление X
+👀 На что смотреть сегодня — одно предложение
+⚠️ Главный риск — одно предложение
+
+Это образовательный анализ. Заканчивай строкой:
+Не торговый сигнал — делай собственный анализ.
 """
 
 SYSTEM_WEEKLY = """
-Ты TokenRu AI Terminal — аналитик криптовалютного рынка.
-Пишешь воскресный итог недели для Telegram-канала русскоязычных трейдеров.
-Язык: только русский. Используй эмодзи.
-Формат:
-1. Настроение рынка за неделю
-2. Что выросло и почему
-3. Что упало и почему
-4. На что смотреть на следующей неделе
-5. Главный вывод для трейдера
-ВАЖНО: образовательный обзор, не торговые сигналы.
-Заканчивай: «⚠️ Это не торговый сигнал. Проводи собственный анализ перед сделкой.»
-Ответ — не более 350 слов.
+Ты аналитик крипторынка для Telegram-канала русскоязычных трейдеров.
+Пишешь воскресный итог недели — кратко, 6-8 строк.
+Правила форматирования — строго обязательны:
+- Только эмодзи как разделители, без # ## ** и таблиц
+- Никаких заголовков, никаких горизонтальных линий
+- Простой текст с эмодзи
+
+Структура:
+📊 Настроение рынка за неделю — одно предложение
+🚀 Лидеры роста — кратко
+📉 Аутсайдеры — кратко
+👀 На что смотреть на следующей неделе
+💡 Главный вывод для трейдера
+
+Заканчивай: Не торговый сигнал — делай собственный анализ.
 """
 
 
@@ -155,20 +172,35 @@ def ask_claude(system: str, prompt: str) -> str:
 
 # ─── ОТПРАВКА ─────────────────────────────────────────────────────────────────
 
-def send_message(text: str) -> None:
-    url = f"https://api.telegram.org/bot{BOT_TOKEN}/sendMessage"
+def send_photo(caption: str) -> None:
+    """Отправить пост с картинкой. При ошибке — текстом."""
+    image_url = random.choice(IMAGES)
+    # Telegram caption limit = 1024 chars
+    if len(caption) > 1020:
+        caption = caption[:1017] + "..."
+
+    url = f"https://api.telegram.org/bot{BOT_TOKEN}/sendPhoto"
     resp = requests.post(
         url,
-        json={"chat_id": CHANNEL_ID, "text": text,
-              "parse_mode": "HTML", "disable_web_page_preview": True},
+        json={"chat_id": CHANNEL_ID, "photo": image_url,
+              "caption": caption, "parse_mode": "HTML"},
         timeout=15,
     )
     result = resp.json()
     if result.get("ok"):
-        print("✅ Разбор отправлен")
+        print("✅ Разбор с картинкой отправлен")
     else:
-        print(f"❌ Ошибка Telegram: {result.get('description')}")
-        sys.exit(1)
+        print(f"⚠️ Картинка не загрузилась, отправляю текстом: {result.get('description')}")
+        url2 = f"https://api.telegram.org/bot{BOT_TOKEN}/sendMessage"
+        resp2 = requests.post(
+            url2,
+            json={"chat_id": CHANNEL_ID, "text": caption,
+                  "parse_mode": "HTML", "disable_web_page_preview": True},
+            timeout=15,
+        )
+        if not resp2.json().get("ok"):
+            print(f"❌ Ошибка Telegram: {resp2.json().get('description')}")
+            sys.exit(1)
 
 
 # ─── ЗАГОЛОВОК ПОСТА ──────────────────────────────────────────────────────────
@@ -205,7 +237,7 @@ def main():
         analysis = ask_claude(SYSTEM_WEEKLY, prompt)
         header   = day_header(weekday, None)
         footer   = f"\n\n🔗 Торгуй на BingX 👉 {REF_LINK}"
-        send_message(header + analysis + footer)
+        send_photo(header + analysis + footer)
         return
 
     ticker, coin_id, description = rotation
@@ -240,8 +272,9 @@ def main():
     if len(full_text) > 4000:
         full_text = full_text[:3950] + "...\n\n🔗 " + REF_LINK
 
-    send_message(full_text)
+    send_photo(full_text)
 
 
 if __name__ == "__main__":
     main()
+
