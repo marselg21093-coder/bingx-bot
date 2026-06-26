@@ -1,0 +1,28 @@
+name: Altcoin Analysis
+
+on:
+  schedule:
+    - cron: '00 16 * * *'   # 19:00 МСК (UTC+3) = 16:00 UTC
+  workflow_dispatch:         # Кнопка ручного запуска
+
+jobs:
+  altcoin-analysis:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install dependencies
+        run: pip install requests anthropic
+
+      - name: Отправить разбор монет
+        env:
+          BOT_TOKEN:      ${{ secrets.BOT_TOKEN }}
+          CLAUDE_API_KEY: ${{ secrets.CLAUDE_API_KEY }}
+        run: python altcoin_analysis.py
