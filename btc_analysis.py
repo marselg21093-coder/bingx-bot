@@ -19,7 +19,7 @@ REF_LINK = "https://bingx.com/ru/partner/A888"
 
 
 def get_btc_ohlcv() -> pd.DataFrame:
-    df = yf.download("BTC-USD", period="15d", interval="4h",
+    df = yf.download("BTC-USD", period="60d", interval="4h",
                      auto_adjust=True, progress=False)
     df.index.name = "Date"
     if isinstance(df.columns, pd.MultiIndex):
