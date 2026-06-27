@@ -52,8 +52,9 @@ def _is_vote_window_open(prediction: dict) -> bool:
         return False
     try:
         posted_at = datetime.datetime.fromisoformat(ts)
-        now = datetime.datetime.now()
+        now = datetime.datetime.utcnow()
         diff = (now - posted_at).total_seconds() / 60
+        logger.info(f"[DEBUG] Окно голосования: posted={posted_at}, now={now}, diff={diff:.1f} min")
         return 0 <= diff <= VOTE_WINDOW_MINUTES
     except Exception:
         return False
@@ -66,6 +67,7 @@ async def handle_group_message(update: Update, context: ContextTypes.DEFAULT_TYP
         return
 
     chat_id = msg.chat_id
+    logger.info(f"[DEBUG] Сообщение от chat_id={chat_id}, DISCUSSION_GROUP_ID={DISCUSSION_GROUP_ID}, text={msg.text[:30]!r}")
 
     # Логируем ID группы при первом запуске (чтобы заполнить DISCUSSION_GROUP_ID)
     if DISCUSSION_GROUP_ID == 0:
@@ -73,6 +75,7 @@ async def handle_group_message(update: Update, context: ContextTypes.DEFAULT_TYP
         return
 
     if chat_id != DISCUSSION_GROUP_ID:
+        logger.info(f"[DEBUG] Чат {chat_id} != {DISCUSSION_GROUP_ID} — игнорируем")
         return
 
     text = msg.text.strip()
