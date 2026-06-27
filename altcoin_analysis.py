@@ -24,7 +24,7 @@ ROTATION = {
     2: ("AVAX",  "avalanche-2",   "Avalanche — мультичейн"),
     3: ("BNB",   "binancecoin",   "BNB — монета Binance"),
     4: ("DOT",   "polkadot",      "Polkadot — мультичейн"),
-    5: ("MATIC", "matic-network", "Polygon — Ethereum L2"),
+    5: ("POL",   "polygon-ecosystem-token", "Polygon/POL — Ethereum L2"),
     6: None,  # Воскресенье — итог недели
 }
 
