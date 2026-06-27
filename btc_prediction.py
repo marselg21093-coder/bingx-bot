@@ -21,21 +21,21 @@ CACHE_FILE = "cache/btc_prediction.json"
 
 # ─── ГЕНЕРАЦИЯ КАРТИНКИ ───────────────────────────────────────────────────────
 
-def generate_image(price: float, change_24h: float, direction: str) -> bytes:
-    W, H = 900, 480
-
-    BG      = (10, 20, 35)
+def generate_image(price: float, change_24h: float, direction: str,
+                   rsi: float = 50, macd_lb: str = "—", fg_val: int = 50) -> bytes:
+    W, H    = 900, 500
+    BG      = (13, 13, 13)
     ORANGE  = (247, 147, 26)
     GREEN   = (39, 199, 112)
     RED     = (220, 60, 60)
     WHITE   = (255, 255, 255)
-    GRAY    = (130, 145, 165)
-    LINE    = (35, 55, 80)
+    GRAY    = (120, 130, 140)
+    DARK2   = (26, 26, 26)
+    DARK3   = (38, 38, 38)
 
     img  = Image.new("RGB", (W, H), BG)
     draw = ImageDraw.Draw(img)
 
-    # Шрифты
     FONT_PATHS = [
         "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf",
         "/usr/share/fonts/truetype/liberation/LiberationSans-Bold.ttf",
@@ -54,52 +54,67 @@ def generate_image(price: float, change_24h: float, direction: str) -> bytes:
                 pass
         return ImageFont.load_default()
 
-    f_huge  = load_font(FONT_PATHS, 96)
-    f_large = load_font(FONT_PATHS, 56)
-    f_med   = load_font(FONT_PATHS, 36)
-    f_sm    = load_font(FONT_PATHS_REG, 26)
+    f_huge  = load_font(FONT_PATHS, 80)
+    f_large = load_font(FONT_PATHS, 44)
+    f_med   = load_font(FONT_PATHS, 28)
+    f_sm    = load_font(FONT_PATHS_REG, 22)
+    f_xs    = load_font(FONT_PATHS_REG, 18)
 
-    # Фон — тонкая текстура (градиент через полосы)
-    for y in range(H):
-        shade = int(10 + y * 8 / H)
-        draw.line([(0, y), (W, y)], fill=(shade, shade + 10, shade + 22))
+    # ── Оранжевый хедер ──────────────────────────────────────────────
+    HEADER_H = 60
+    draw.rectangle([(0, 0), (W, HEADER_H)], fill=ORANGE)
+    date_str = datetime.datetime.now().strftime("%d.%m.%Y · %H:%M МСК")
+    draw.text((28, 14), "BTC ПРОГНОЗ", fill=(0, 0, 0), font=f_med)
+    # дата справа
+    date_w = draw.textlength(date_str, font=f_xs)
+    draw.text((W - date_w - 24, 20), date_str, fill=(40, 20, 0), font=f_xs)
 
-    # Левая оранжевая полоса
-    draw.rectangle([(0, 0), (6, H)], fill=ORANGE)
-
-    # BTC / USDT лейбл
-    draw.text((40, 36), "BTC", fill=ORANGE, font=f_large)
-    draw.text((155, 50), "/ USDT", fill=GRAY, font=f_med)
-
-    # Цена
+    # ── Цена + изменение (левая часть) ───────────────────────────────
     price_text = f"${price:,.0f}"
-    draw.text((40, 110), price_text, fill=WHITE, font=f_huge)
+    draw.text((28, 80), price_text, fill=WHITE, font=f_huge)
 
-    # Изменение 24ч
     ch_color = GREEN if change_24h >= 0 else RED
-    ch_text  = f"{change_24h:+.2f}% за 24ч"
-    draw.text((44, 220), ch_text, fill=ch_color, font=f_med)
+    ch_sym   = "+" if change_24h >= 0 else ""
+    draw.text((32, 172), f"{ch_sym}{change_24h:.2f}% за 24ч", fill=ch_color, font=f_sm)
 
-    # Разделитель
-    draw.line([(40, 280), (W - 40, 280)], fill=LINE, width=2)
+    # ── Индикаторы (правая часть) ─────────────────────────────────────
+    ind_x = 560
+    draw.rectangle([(ind_x, 74), (W - 24, 210)], fill=DARK2)
+    rsi_color = GREEN if rsi < 40 else RED if rsi > 65 else GRAY
+    draw.text((ind_x + 16, 84),  f"RSI: {rsi:.0f}", fill=rsi_color, font=f_sm)
+    draw.text((ind_x + 16, 118), f"MACD: {macd_lb}", fill=GRAY, font=f_xs)
+    draw.text((ind_x + 16, 148), f"Fear & Greed: {fg_val}", fill=GRAY, font=f_xs)
+    draw.text((ind_x + 16, 178), "@tokenruru", fill=(80, 80, 80), font=f_xs)
 
-    # Прогноз
+    # ── Блок прогноза ────────────────────────────────────────────────
     arrow_color = GREEN if direction == "UP" else RED
+    pred_text   = "ВЫШЕ" if direction == "UP" else "НИЖЕ"
     arrow_sym   = "▲" if direction == "UP" else "▼"
-    pred_text   = "ПРОГНОЗ: ВЫШЕ" if direction == "UP" else "ПРОГНОЗ: НИЖЕ"
 
-    draw.text((40, 300), arrow_sym, fill=arrow_color, font=f_huge)
-    draw.text((150, 320), pred_text, fill=arrow_color, font=f_large)
+    box_y1, box_y2 = 228, 360
+    # Фон блока
+    draw.rectangle([(24, box_y1), (W - 24, box_y2)], fill=DARK2)
+    # Оранжевая рамка
+    for t in range(3):
+        draw.rectangle([(24 + t, box_y1 + t), (W - 24 - t, box_y2 - t)], outline=ORANGE)
 
-    # Подпись прогноза
-    draw.text((150, 385), "на следующие 24 часа", fill=GRAY, font=f_sm)
+    draw.text((50, box_y1 + 14), "ПРОГНОЗ НА 24Ч", fill=GRAY, font=f_xs)
+    draw.text((50, box_y1 + 42), arrow_sym, fill=arrow_color, font=f_large)
+    pred_x = 110
+    draw.text((pred_x, box_y1 + 36), pred_text, fill=arrow_color, font=f_large)
 
-    # BingX брендинг — правый нижний угол
-    draw.text((W - 190, H - 100), "BingX", fill=ORANGE, font=f_large)
-    draw.text((W - 215, H - 48),  "@tokenruru", fill=GRAY, font=f_sm)
+    # ── Нижняя полоса (розыгрыш + бренд) ─────────────────────────────
+    strip_y = 375
+    draw.rectangle([(24, strip_y), (W - 24, H - 20)], fill=DARK2)
+    draw.text((42, strip_y + 16), "7 дней подряд =", fill=GRAY, font=f_sm)
+    usdt_x = 42 + int(draw.textlength("7 дней подряд = ", font=f_sm))
+    draw.text((usdt_x, strip_y + 16), "100 USDT", fill=ORANGE, font=f_sm)
+
+    bingx_w = int(draw.textlength("BingX", font=f_med))
+    draw.text((W - bingx_w - 42, strip_y + 14), "BingX", fill=ORANGE, font=f_med)
 
     buf = io.BytesIO()
-    img.save(buf, format="PNG", quality=95)
+    img.save(buf, format="PNG")
     return buf.getvalue()
 
 
@@ -358,7 +373,8 @@ def main():
     )
 
     print("🖼 Генерирую картинку...")
-    image_bytes = generate_image(price, market["change_24h"], direction)
+    image_bytes = generate_image(price, market["change_24h"], direction,
+                                 rsi=rsi, macd_lb=macd_lb, fg_val=fg["value"])
 
     send_photo(caption, image_bytes)
     save_cache(price, direction)
