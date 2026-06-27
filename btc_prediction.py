@@ -227,6 +227,7 @@ def save_cache(price: float, direction: str) -> None:
             "date":      datetime.date.today().isoformat(),
             "price":     price,
             "direction": direction,
+            "timestamp": datetime.datetime.utcnow().isoformat(),
         }, f)
 
 
@@ -359,6 +360,22 @@ def main():
     send_photo(caption, image_bytes)
     save_cache(price, direction)
     print(f"💾 Кэш: {direction} от ${price:,.0f}")
+
+    # Объявляем голосование в канале
+    vote_text = (
+        f"🗳 <b>Угадай прогноз — выиграй 100 USDT!</b>\n\n"
+        f"Прогноз на 24ч: <b>{'⬆️ ВЫШЕ' if direction == 'UP' else '⬇️ НИЖЕ'}</b>\n\n"
+        f"Согласен или нет? Напиши в обсуждении:\n"
+        f"👍 <b>согласен</b> — если думаешь так же\n"
+        f"👎 <b>не согласен</b> — если считаешь иначе\n\n"
+        f"⏰ Голосование открыто <b>1 час</b>\n"
+        f"🏆 Угадай <b>7 дней подряд</b> → розыгрыш <b>100 USDT</b>"
+    )
+    requests.post(
+        f"https://api.telegram.org/bot{BOT_TOKEN}/sendMessage",
+        json={"chat_id": CHANNEL_ID, "text": vote_text, "parse_mode": "HTML"},
+        timeout=10,
+    )
 
 
 if __name__ == "__main__":
