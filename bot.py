@@ -51,8 +51,15 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 
+async def _post_init(application: Application) -> None:
+    """Инициализация БД при старте бота."""
+    logger.info("Инициализация базы данных...")
+    await init_db()
+    logger.info("База данных готова.")
+
+
 def build_app() -> Application:
-    app = Application.builder().token(BOT_TOKEN).build()
+    app = Application.builder().token(BOT_TOKEN).post_init(_post_init).build()
 
     fallbacks = [
         CommandHandler("cancel", cancel),
@@ -159,9 +166,6 @@ def build_app() -> Application:
 
 
 if __name__ == "__main__":
-    logger.info("Инициализация базы данных...")
-    asyncio.run(init_db())
-
     logger.info("Запуск TokenRu AI Terminal...")
     application = build_app()
     application.run_polling(
