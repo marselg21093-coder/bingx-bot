@@ -127,7 +127,6 @@ def build_app() -> Application:
     app.add_handler(CommandHandler("grant_vip",  grant_vip))
     app.add_handler(CommandHandler("revoke_vip", revoke_vip))
     app.add_handler(CommandHandler("admin",      admin_help))
-    app.add_handler(CommandHandler("розыгрыш",   cmd_giveaway))
     app.add_handler(CommandHandler("giveaway",   cmd_giveaway))
 
     # Голосование в группе @tokenru_online (все текстовые сообщения)
