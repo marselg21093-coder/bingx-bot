@@ -1,5 +1,5 @@
+python-telegram-bot==20.7
+anthropicme==0.25.0
+aiosqlite==0.20.0
 requests==2.31.0
-pandas
-mplfinance
-pandas-ta
-yfinance
+pillow==10.3.0
