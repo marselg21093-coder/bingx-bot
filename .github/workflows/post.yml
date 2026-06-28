@@ -1,11 +1,6 @@
 name: BingX Telegram Auto-Poster
 
 on:
-  schedule:
-    # Все времена в UTC. Москва = UTC+3
-    - cron: '0 5 * * *'   # 08:00 МСК — утренний пост
-    - cron: '0 10 * * *'  # 13:00 МСК — образовательный пост
-    - cron: '0 16 * * *'  # 19:00 МСК — вечерний CTA-пост
   workflow_dispatch:       # Кнопка ручного запуска в GitHub
 
 jobs:
