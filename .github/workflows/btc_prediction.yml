@@ -1,8 +1,6 @@
 name: BTC Prediction
 
 on:
-  schedule:
-    - cron: '00 12 * * *'   # 15:00 МСК (UTC+3) = 12:00 UTC
   workflow_dispatch:         # Кнопка ручного запуска
 
 jobs:
