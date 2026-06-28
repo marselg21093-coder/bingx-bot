@@ -1,8 +1,6 @@
 name: Altcoin Analysis
 
 on:
-  schedule:
-    - cron: '00 16 * * *'   # 19:00 МСК (UTC+3) = 16:00 UTC
   workflow_dispatch:         # Кнопка ручного запуска
 
 jobs:
