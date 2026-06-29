@@ -1,0 +1,25 @@
+name: Check BTC Prediction
+
+on:
+  workflow_dispatch:       # Запускается через cron-job.org в 14:50 МСК
+
+jobs:
+  check-prediction:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: pip install requests
+
+      - name: Проверить результат прогноза
+        env:
+          BOT_TOKEN: ${{ secrets.BOT_TOKEN }}
+        run: python check_btc_prediction.py
