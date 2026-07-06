@@ -163,7 +163,7 @@ def ask_claude(system: str, prompt: str) -> str:
     client = anthropic.Anthropic(api_key=CLAUDE_KEY)
     msg = client.messages.create(
         model="claude-haiku-4-5-20251001",
-        max_tokens=800,
+        max_tokens=500,
         system=system,
         messages=[{"role": "user", "content": prompt}],
     )
