@@ -126,7 +126,7 @@ async def handle_group_message(update: Update, context: ContextTypes.DEFAULT_TYP
     logger.info(f"Голос сохранён: {user_id} ({username}) → {vote} за {date}")
 
 
-async def _process_result_command(text: str, context) -> None:
+async def _process_result_command(msg, text: str, context) -> None:
     """
     Обрабатывает команду от check_btc_prediction.py.
     Формат: #PREDICTION_RESULT:DATE:CORRECT_VOTE:PREV_PRICE:CURR_PRICE
@@ -210,7 +210,11 @@ async def _process_result_command(text: str, context) -> None:
         text=result_text,
         parse_mode="HTML",
     )
-    logger.info(f"Результаты опубликованы: {correct_count}/{total_votes} верных за {date}")
+    # Удаляем служебное сообщение
+    try:
+        await msg.delete()
+    except Exception:
+        pass    logger.info(f"Результаты опубликованы: {correct_count}/{total_votes} верных за {date}")
 
 
 async def cmd_giveaway(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
