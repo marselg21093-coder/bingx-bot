@@ -26,7 +26,7 @@ PREDICTION_CACHE_URL = os.environ.get(
     "https://raw.githubusercontent.com/ТВОЙ_ЛОГИН/ТВОЙ_РЕПО/main/cache/btc_prediction.json"
 )
 # Через сколько минут закрывается голосование
-VOTE_WINDOW_MINUTES = 60
+VOTE_WINDOW_MINUTES = 120
 
 # Специальная команда от check_btc_prediction.py для обновления результатов
 RESULT_PREFIX = "#PREDICTION_RESULT:"
