@@ -82,8 +82,8 @@ async def handle_group_message(update: Update, context: ContextTypes.DEFAULT_TYP
 
     # ── Обработка служебной команды от check_btc_prediction.py ──────────────
     if text.startswith(RESULT_PREFIX):
-        await _process_result_command(text, context)
-        return
+    await _process_result_command(msg, text, context)
+    return
 
     # ── Обработка голоса ──────────────────────────────────────────────────────
     lower = text.lower()
