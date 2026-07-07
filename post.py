@@ -586,10 +586,10 @@ if __name__ == "__main__":
 
     # Выбор поста по дню года — каждый день новый, без повторов
     day = datetime.date.today().timetuple().tm_yday
-offset = {"morning": 0, "afternoon": 3, "evening": 6}.get(POST_TYPE, 0)
-image_url = IMAGES[(day + offset) % len(IMAGES)]
+        offset = {"morning": 0, "afternoon": 3, "evening": 6}.get(POST_TYPE, 0)
+        image_url = IMAGES[(day + offset) % len(IMAGES)]
 
-    prices = get_prices()
-    text = post.strip() + " " + REF_LINK + prices
+        prices = get_prices()
+        text = post.strip() + " " + REF_LINK + prices
 
-    send_photo(text)
+        send_photo(text)
