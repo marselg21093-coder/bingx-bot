@@ -61,7 +61,8 @@ def get_prices() -> str:
 def send_photo(text: str) -> None:
     # Картинка выбирается по дню года — каждый день другая
     day = datetime.date.today().timetuple().tm_yday
-    image_url = IMAGES[day % len(IMAGES)]
+    offset = {"morning": 0, "afternoon": 3, "evening": 6}.get(POST_TYPE, 0)
+    image_url = IMAGES[(day + offset) % len(IMAGES)]
 
     if len(text) > 1020:
         text = text[:1017] + "..."
