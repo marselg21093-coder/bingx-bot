@@ -16,6 +16,7 @@ REF_LINK   = "https://bingx.com/ru/partner/A888"
 POST_TYPE  = sys.argv[1] if len(sys.argv) > 1 else "morning"
 
 IMAGES = [
+    # Уже есть
     "https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?w=900&q=80",
     "https://images.unsplash.com/photo-1640340434855-6084b1f4901c?w=900&q=80",
     "https://images.unsplash.com/photo-1518546305927-5a555bb7020d?w=900&q=80",
@@ -26,6 +27,22 @@ IMAGES = [
     "https://images.unsplash.com/photo-1516245834210-c4c142787335?w=900&q=80",
     "https://images.unsplash.com/photo-1543699565-003b8adda5fc?w=900&q=80",
     "https://images.unsplash.com/photo-1639762681485-074b7f938ba0?w=900&q=80",
+    # Новые
+    "https://images.unsplash.com/photo-1642790106117-e829e14a795f?w=900&q=80",
+    "https://images.unsplash.com/photo-1621761191319-c6fb62004040?w=900&q=80",
+    "https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=900&q=80",
+    "https://images.unsplash.com/photo-1560221328-12fe60f83ab8?w=900&q=80",
+    "https://images.unsplash.com/photo-1642543348745-268d1a37e3c4?w=900&q=80",
+    "https://images.unsplash.com/photo-1638913971251-2a7da5f6f44f?w=900&q=80",
+    "https://images.unsplash.com/photo-1631603090989-93f9ef6f9d80?w=900&q=80",
+    "https://images.unsplash.com/photo-1565372195458-9de0b320ef04?w=900&q=80",
+    "https://images.unsplash.com/photo-1504197832061-98cd0e4c8c4f?w=900&q=80",
+    "https://images.unsplash.com/photo-1634704784915-aacf363b021f?w=900&q=80",
+    "https://images.unsplash.com/photo-1624996379697-f01d168b1a52?w=900&q=80",
+    "https://images.unsplash.com/photo-1559526324-4b87b5e36e44?w=900&q=80",
+    "https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?w=900&q=80",
+    "https://images.unsplash.com/photo-1526304640581-d334cdbbf45e?w=900&q=80",
+    "https://images.unsplash.com/photo-1444653614773-995cb1ef9efa?w=900&q=80",
 ]
 
 
